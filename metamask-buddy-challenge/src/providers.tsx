@@ -3,7 +3,7 @@ import { useState, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import config from "@/rainbowKitConfig";
 import { WagmiConfig } from "wagmi";
-import { RainbowKitProvider,ConnectButton } from "@rainbow-me/rainbowkit";
+import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import "@rainbow-me/rainbowkit/styles.css"
 
 export function Providers(props: { children: ReactNode }) {
@@ -13,7 +13,7 @@ export function Providers(props: { children: ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <WagmiConfig config={config}>
         <RainbowKitProvider>
-            <ConnectButton/>
+            
           {props.children}
         </RainbowKitProvider>
       </WagmiConfig>

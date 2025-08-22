@@ -96,7 +96,7 @@ export const WalletCard = () => {
               {balance && (
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-muted-foreground">Balance</span>
-                  <span className="text-sm font-mono">{balance} ETH</span>
+                  <span className="text-sm font-mono">{balance?.formatted} {balance?.symbol} </span>
                 </div>
               )}
             </div>
@@ -104,11 +104,13 @@ export const WalletCard = () => {
 
           <div className="flex gap-2">
             {!isConnected ? (
-              <Button 
+              
+               <Button 
                 onClick={connect}
                 disabled={!isMetamaskInstalled || isConnecting}
                 className="flex-1 bg-gradient-crypto hover:shadow-glow transition-all duration-200"
-              >
+              > 
+                
                 {isConnecting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

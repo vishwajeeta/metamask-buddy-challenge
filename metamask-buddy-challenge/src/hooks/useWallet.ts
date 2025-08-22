@@ -1,7 +1,25 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { 
+  useAccount, 
+  useConnect, 
+  useDisconnect, 
+  useBalance,
+  useChainId,
+  useConfig 
+} from 'wagmi';
 import { WalletState } from '@/types/wallet';
+import { metaMask } from 'wagmi/connectors';
+import { useConnectModal } from '@rainbow-me/rainbowkit';
 
 export const useWallet = () => {
+  const config = useConfig();
+  const { address, isConnected, connector } = useAccount();
+  const { connect, connectors, error, isPending } = useConnect();
+  const { disconnect } = useDisconnect();
+  const chainId = useChainId();
+  const { data: balance } = useBalance({ address });
+  
+  
   const [walletState, setWalletState] = useState<WalletState>({
     address: null,
     isConnected: false,
@@ -11,34 +29,77 @@ export const useWallet = () => {
     balance: null,
   });
 
-  // TODO: Implement MetaMask detection
-  const isMetamaskInstalled = false;
+   const { openConnectModal } = useConnectModal();
+  // Check if MetaMask is installed
+  const isMetamaskInstalled = typeof window !== 'undefined' && 
+    Boolean(window.ethereum?.isMetaMask);
 
-  // TODO: Implement wallet connection
-  const connect = useCallback(async () => {
-    // Implementation needed:
-    // 1. Check if MetaMask is installed
-    // 2. Request account access using eth_requestAccounts
-    // 3. Get account address and chain ID
-    // 4. Get account balance using eth_getBalance 
-    // 5. Update wallet state
-    // 6. Handle errors appropriately
-    
-    console.log('Connect wallet - TO BE IMPLEMENTED');
-  }, []);
+  // Update wallet state when Wagmi state changes
+  useEffect(() => {
+    setWalletState({
+      address,
+      isConnected,
+      isConnecting: isPending,
+      error: error?.message || null,
+      chainId,
+      balance: balance ? {
+        value: balance.value,
+        formatted: balance.formatted,
+        symbol: balance.symbol,
+        decimals: balance.decimals
+      } : null,
+    });
+  }, [address, isConnected, isPending, error, chainId, balance]);
 
-  // TODO: Implement wallet disconnection
-  const disconnect = useCallback(() => {
-    // Implementation needed:
-    // Reset wallet state to initial values
-    
-    console.log('Disconnect wallet - TO BE IMPLEMENTED');
-  }, []);
+  // Connect wallet function
+  const connectWallet = useCallback(async () => {
+    try {
+      // Use RainbowKit's modal if available
+      if (openConnectModal) {
+        openConnectModal();
+      } 
+      // Fallback to direct connection
+      else if (isMetamaskInstalled) {
+        connect({ connector: metaMask() });
+      } else {
+        const availableConnectors = connectors.filter(
+          connector => connector.ready
+        );
+        
+        if (availableConnectors.length > 0) {
+          connect({ connector: availableConnectors[0] });
+        } else {
+          throw new Error('No wallet connectors available');
+        }
+      }
+    } catch (err) {
+      setWalletState(prev => ({
+        ...prev,
+        error: err.message,
+        isConnecting: false
+      }));
+    }
+  }, [openConnectModal, connect, connectors, isMetamaskInstalled]);
+  
+
+  // Disconnect wallet function
+  const disconnectWallet = useCallback(() => {
+    disconnect();
+    setWalletState({
+      address: null,
+      isConnected: false,
+      isConnecting: false,
+      error: null,
+      chainId: null,
+      balance: null,
+    });
+  }, [disconnect]);
 
   return {
     ...walletState,
     isMetamaskInstalled,
-    connect,
-    disconnect,
+    connect: connectWallet,
+    disconnect: disconnectWallet,
+    connector: connector?.name || null,
   };
 };

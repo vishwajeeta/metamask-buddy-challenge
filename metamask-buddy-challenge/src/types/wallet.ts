@@ -3,8 +3,8 @@ export interface WalletState {
   isConnected: boolean;
   isConnecting: boolean;
   error: string | null;
-  chainId: string | null;
-  balance: string | null;
+  chainId: number | null;
+  balance: {} | null;
 }
 
 export interface MetamaskError {
@@ -17,4 +17,4 @@ export type WalletAction =
   | { type: 'CONNECT_SUCCESS'; address: string; chainId: string }
   | { type: 'CONNECT_ERROR'; error: string }
   | { type: 'DISCONNECT' }
-  | { type: 'UPDATE_BALANCE'; balance: string };
+  | { type: 'UPDATE_BALANCE'; balance: {} };

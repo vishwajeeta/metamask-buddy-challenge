@@ -1,11 +1,17 @@
 import { WalletCard } from "../components/WalletCard";
 import { TestInstructions } from "../components/TestInstructions";
-
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
+        
+        {/* Header */}<div className="flex justify-between items-center mb-8">
+      <div>{/* Your logo or title can go here */}</div>
+      <ConnectButton />
+    </div>
+    
+        
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-2 bg-gradient-crypto bg-clip-text text-transparent">
             MetaMask Integration Test
